@@ -1,3 +1,9 @@
+function fileName(){
+ var theError = new Error("here I am");
+ return theError.stack.match(/\/(\w+\.js)\:/)[1];
+};
+console.log(`Welcome to ${fileName()}!`);
+
 var easy = 'easy';
 var medium = 'medium';
 var hard = 'hard';
@@ -8,28 +14,21 @@ tooManyCooks = ['c', 'g', 'f'];
 iWillFollowYouIntoTheDark = ['f', 'dm', 'bb', 'c', 'a', 'bbm'];
 babyOneMoreTime = ['cm', 'g', 'bb', 'eb', 'fm', 'ab'];
 creep = ['g', 'gsus4', 'b', 'bsus4', 'c', 'cmsus4', 'cm6'];
-paperBag = ['bm7', 'e', 'c', 'g', 'b7', 'f', 'em', 'a', 'cmaj7',
- 'em7', 'a7', 'f7', 'b'];
-toxic = ['cm', 'eb', 'g', 'cdim', 'eb7', 'd7', 'db7', 'ab', 'gmaj7',
- 'g7'];
+paperBag = ['bm7', 'e', 'c', 'g', 'b7', 'f', 'em', 'a', 'cmaj7', 'em7', 'a7', 'f7', 'b'];
+toxic = ['cm', 'eb', 'g', 'cdim', 'eb7', 'd7', 'db7', 'ab', 'gmaj7', 'g7'];
 bulletproof = ['d#m', 'g#', 'b', 'f#', 'g#m', 'c#'];
-var songs = [];
-var labels = [];
-var allChords = [];
-var labelCounts = [];
-var labelProbabilities = [];
 
+var songs = [];
+var allChords = {};
+var labelCounts = {};
+var labelProbabilities = {};
 var chordCountsInLabels = {};
 var probabilityOfChordsInLabels = {};
 
 function train(chords, label){
-   songs.push([label, chords]);
-   labels.push(label);
-   for (var index = 0; index < chords.length; index++){
-     if(!allChords.includes(chords[index])){
-       allChords.push(chords[index]);
-     }
-   }
+   var index;
+   songs.push({label: label, chords: chords});
+   chords.forEach(chord => {allChords.add(chord);});
    if((Object.keys(labelCounts).includes(label))){
      labelCounts[label] = labelCounts[label] + 1;
    } else {
@@ -40,8 +39,7 @@ function train(chords, label){
 
 function setLabelProbabilities(){
  Object.keys(labelCounts).forEach(function(label){
-   var numberOfSongs = songs.length;
-   labelProbabilities[label] = labelCounts[label] / numberOfSongs;
+   labelProbabilities[label] = labelCounts[label] / songs.length;
  });
 };
 
@@ -84,15 +82,16 @@ setChordCountsInLabels();
 setProbabilityOfChordsInLabels();
 
 function classify(chords){
-  console.log(labelProbabilities);
+  var smoothing = 1.01;
   var classified = {};
+  console.log(labelProbabilities);
   Object.keys(labelProbabilities).forEach(function(difficulty){
-    var first = labelProbabilities[difficulty] + 1.01;
+    var first = labelProbabilities[difficulty] + smoothing;
     chords.forEach(function(chord){
       var probabilityOfChordInLabel =
       probabilityOfChordsInLabels[difficulty][chord];
       if(probabilityOfChordInLabel){
-        first = first * (probabilityOfChordInLabel + 1.01);
+        first = first * (probabilityOfChordInLabel + smoothing);
       }
     });
     classified[difficulty] = first;
