@@ -1,31 +1,29 @@
-class Word{
-  constructor(word, language, lookUpUrl){
-    this.word = word;
-    this.language = language;
-    this.lookUpUrl = lookUpUrl;
-  }
-
-  count(){
-    return this.word.length;
-  };
-
-  lookup(){
-    return this.lookUpUrl + this.word;
-  };
-
+function Word(){
+ this.count = function(){
+   return this.word.length;
+ };
+ this.lookUp = function(){
+   return this.lookUpUrl + this.word;
+ };
+};
+function EnglishWord(word){
+  Word.call(this);
+  this.word = word;
+  this.language = "English";
+  this.lookUpUrl = 'https://en.wiktionary.org/wiki/';
 };
 
-class EnglishWord extends Word{
-  constructor(word){
-    super(word, "English", 'https://en.wiktionary.org/wiki/');
-  }
-}
+function JapaneseWord(word){
+  Word.call(this);
+  this.word = word;
+  this.language = "Japanese";
+  this.lookUpUrl = 'http://jisho.org/search/';
+};
+JapaneseWord.prototype = Object.create(Word.prototype);
+JapaneseWord.prototype.constructor = JapaneseWord;
+EnglishWord.prototype = Object.create(Word.prototype);
+EnglishWord.prototype.constructor = EnglishWord;
 
-class JapaneseWord extends Word{
-  constructor(word){
-    super(word, 'Japanese', 'http://jisho.org/search/');
-  }
-}
 
 const wish = require('wish');
 const deepEqual = require('deep-equal');
